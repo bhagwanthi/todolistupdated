@@ -96,32 +96,11 @@ def main():
             ], default=st.session_state['user_data']['Stages Involved In'])
             st.session_state['user_data']['Popular Keywords'] = st.text_input('Popular Keywords', value=st.session_state['user_data']['Popular Keywords'])
 
-            submit_button = st.form_submit_button('Submit')
+            submit_button_left = st.form_submit_button('Submit')
 
     # Right container for ideal user information
     with col2:
         st.header('Ideal User Info')
-
-        if submit_button:
-            # Update ideal_data with user_data upon submission
-            st.session_state['ideal_data'].update({
-                'Ideal Age': st.session_state['user_data']['Age'],
-                'Ideal Title': st.session_state['user_data']['Title'],
-                'Ideal Meeting Frequency': st.session_state['user_data']['Meeting Frequency'],
-                'Ideal Meeting Duration': st.session_state['user_data']['Meeting Duration'],
-                'Ideal Closed Deals': st.session_state['user_data']['Closed Deals'],
-                'Ideal Email Intent': st.session_state['user_data']['Email Intent'],
-                'Ideal Calls Frequency': st.session_state['user_data']['Calls Frequency'],
-                'Ideal Calls Duration': st.session_state['user_data']['Calls Duration'],
-                'Ideal Campaign Frequency': st.session_state['user_data']['Campaign Frequency'],
-                'Ideal Years of Experience': st.session_state['user_data']['Years of Experience'],
-                'Ideal Contact Role Tagged': st.session_state['user_data']['Contact Role Tagged'],
-                'Ideal Value Score': st.session_state['user_data']['Value Score'],
-                'Ideal Mood Score': st.session_state['user_data']['Mood Score'],
-                'Ideal Engagement Score': st.session_state['user_data']['Engagement Score'],
-                'Ideal Stages Involved In': st.session_state['user_data']['Stages Involved In'],
-                'Ideal Popular Keywords': st.session_state['user_data']['Popular Keywords']
-            })
 
         persona_options = [
             'Decision Maker',
@@ -160,6 +139,30 @@ def main():
                     'closed lost'
                 ], default=st.session_state['ideal_data']['Ideal Stages Involved In'])
                 st.text_input('Ideal Popular Keywords', value=st.session_state['ideal_data']['Ideal Popular Keywords'])
+
+                submit_button_right = st.button('Submit Ideal Data')
+
+                if submit_button_right:
+                    # Update ideal_data with the latest inputs
+                    st.session_state['ideal_data'].update({
+                        'Ideal Age': st.session_state['ideal_data']['Ideal Age'],
+                        'Ideal Title': st.session_state['ideal_data']['Ideal Title'],
+                        'Ideal Meeting Frequency': st.session_state['ideal_data']['Ideal Meeting Frequency'],
+                        'Ideal Meeting Duration': st.session_state['ideal_data']['Ideal Meeting Duration'],
+                        'Ideal Closed Deals': st.session_state['ideal_data']['Ideal Closed Deals'],
+                        'Ideal Email Intent': st.session_state['ideal_data']['Ideal Email Intent'],
+                        'Ideal Calls Frequency': st.session_state['ideal_data']['Ideal Calls Frequency'],
+                        'Ideal Calls Duration': st.session_state['ideal_data']['Ideal Calls Duration'],
+                        'Ideal Campaign Frequency': st.session_state['ideal_data']['Ideal Campaign Frequency'],
+                        'Ideal Years of Experience': st.session_state['ideal_data']['Ideal Years of Experience'],
+                        'Ideal Contact Role Tagged': st.session_state['ideal_data']['Ideal Contact Role Tagged'],
+                        'Ideal Value Score': st.session_state['ideal_data']['Ideal Value Score'],
+                        'Ideal Mood Score': st.session_state['ideal_data']['Ideal Mood Score'],
+                        'Ideal Engagement Score': st.session_state['ideal_data']['Ideal Engagement Score'],
+                        'Ideal Stages Involved In': st.session_state['ideal_data']['Ideal Stages Involved In'],
+                        'Ideal Popular Keywords': st.session_state['ideal_data']['Ideal Popular Keywords']
+                    })
+
     # Display predictions and reasoning
     st.header('Predictions and Reasoning')
     display_predictions()
