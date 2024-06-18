@@ -7,69 +7,44 @@ def load_tasks(date):
         with open(f"tasks_{date}.txt", "r") as file:
             tasks = file.readlines()
         tasks = [task.strip() for task in tasks]
-        tasks_with_descriptions = []
-        for task in tasks:
-            parts = task.split(":")
-            task_text = parts[0]
-            is_completed = parts[1] if len(parts) > 1 else "False"  # Ensure is_completed is present
-            description = parts[2] if len(parts) > 2 else ""  # Ensure description is present
-            tasks_with_descriptions.append((task_text, is_completed, description))
-        return tasks_with_descriptions
     except FileNotFoundError:
-        return []
+        tasks = []
+    return tasks
 
 # Function to save tasks for a specific date to a file
 def save_tasks(date, tasks):
     with open(f"tasks_{date}.txt", "w") as file:
         for task in tasks:
-            task_text, is_completed, description = task
-            file.write(f"{task_text}:{is_completed}:{description}\n")
+            file.write(task + "\n")
 
-# Function to load completion status for all days
-def load_completion_status():
+# Function to load completed tasks for a specific date from a file
+def load_completed_tasks(date):
     try:
-        with open("completion_status.txt", "r") as file:
-            completion_status = file.readlines()
-        completion_status = {date: bool(status.strip()) for date, status in (line.split(":") for line in completion_status)}
+        with open(f"completed_tasks_{date}.txt", "r") as file:
+            tasks = file.readlines()
+        tasks = [task.strip() for task in tasks]
     except FileNotFoundError:
-        completion_status = {}
-    return completion_status
+        tasks = []
+    return tasks
 
-# Function to save completion status for all days
-def save_completion_status(completion_status):
-    with open("completion_status.txt", "w") as file:
-        for date, status in completion_status.items():
-            file.write(f"{date}:{int(status)}\n")
+# Function to save completed tasks for a specific date to a file
+def save_completed_tasks(date, tasks):
+    with open(f"completed_tasks_{date}.txt", "w") as file:
+        for task in tasks:
+            file.write(task + "\n")
 
-# Function to display tasks for a specific date and mark them as completed
-def display_tasks(date, tasks, completion_status):
-    date_str = date.strftime("%Y-%m-%d")  # Convert date to string format
-    all_completed = all(task[1] == "True" for task in tasks)
-    for i, (task_text, is_completed, description) in enumerate(tasks):
-        task_key = f"task_{date_str}_{i}"
-        cols = st.columns([5, 1])
-        task_text_input = cols[0].text_input(label="", key=task_key, value=task_text)
-        completed = cols[1].checkbox(label="", key=f"checkbox_{date_str}_{i}", value=is_completed == "True")
-        description = st.text_area(label="Description", key=f"description_{date_str}_{i}", value=description, height=50)
-
-        tasks[i] = (task_text_input, str(completed), description)  # Update task with description
-        if completed:
-            st.markdown(f'<style>#{task_key} input {{margin-right:10px;}} #{task_key} input:checked + span {{background-color:green; border-color:green;}}</style>', unsafe_allow_html=True)
-        else:
-            st.markdown(f'<style>#{task_key} input {{margin-right:10px;}} #{task_key} input:checked + span {{background-color:red; border-color:red;}}</style>', unsafe_allow_html=True)
-
-    # Show label if all tasks are completed
-    if all_completed:
-        st.markdown("### All tasks for the day are completed!")
-        completion_status[date_str] = True  # Use string format for date
-    else:
-        completion_status[date_str] = False  # Use string format for date
-
-    # Save tasks to file
-    save_tasks(date, tasks)
-
-    # Save completion status
-    save_completion_status(completion_status)
+# Function to display tasks for a specific date
+def display_tasks(date, tasks, completed_tasks):
+    for i, task in enumerate(tasks):
+        task_key = f"task_{date}_{i}"
+        task_text = st.text_input(label="", key=task_key, value=task)
+        is_completed = st.checkbox(label="", key=f"checkbox_{date}_{i}")
+        if is_completed:
+            completed_tasks.append(task_text)
+            tasks.pop(i)
+            save_tasks(date, tasks)
+            save_completed_tasks(date, completed_tasks)
+            st.experimental_rerun()
 
 # Main function
 def main():
@@ -79,30 +54,34 @@ def main():
     # Date picker to select a specific day
     selected_date = st.date_input("Select a date", datetime.date.today())
 
-    # Load existing tasks for the selected date
+    # Load existing tasks and completed tasks for the selected date
     tasks = load_tasks(selected_date)
-
-    # Load completion status for all days
-    completion_status = load_completion_status()
+    completed_tasks = load_completed_tasks(selected_date)
 
     # Add new task for the selected date
     new_task = st.text_input("➕ Enter a new task:")
     if st.button("Add Task"):
         if new_task:
-            tasks.append((new_task, "False", ""))  # Initial description is empty
+            tasks.append(new_task)
             save_tasks(selected_date, tasks)
-            st.experimental_rerun()  # Rerun to immediately reflect the new task
+            st.experimental_rerun()
 
-    # Display tasks for the selected date
-    st.subheader("📋 Your Tasks")
-    if tasks:
-        display_tasks(selected_date, tasks, completion_status)
-    else:
-        st.write("No tasks assigned.")
+    # Display pending tasks and completed tasks in two columns
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader("📋 Your Tasks")
+        if tasks:
+            display_tasks(selected_date, tasks, completed_tasks)
+        else:
+            st.write("No tasks available.")
 
-    # Button to indicate all tasks for the day are completed
-    if tasks and all(task[1] == "True" for task in tasks):
-        st.success("All tasks for the day are completed!")
+    with col2:
+        st.subheader("✅ Completed Tasks")
+        if completed_tasks:
+            for task in completed_tasks:
+                st.write(task)
+        else:
+            st.write("No completed tasks.")
 
 # Run the main function
 if __name__ == "__main__":
